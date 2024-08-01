@@ -2,8 +2,10 @@ function App() {
 
   return (
     <>
-        <p className='text-red-600 text-center items-center font-bold'>Salam be proje jadad v bozorg react</p>
-        <h2 className="text-center text-blue-500">Erfan</h2>
+        <div className="flex items-center justify-center"> 
+          <span className="text-purple-600 font-Dorna text-[2rem] text-center">آرا</span> 
+          <span className="text-black font-Dorna text-[2rem] text-center">تکنو</span> 
+        </div>
     </>
   )
 }

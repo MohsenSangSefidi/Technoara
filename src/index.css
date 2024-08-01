@@ -1,3 +1,14 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base{
+    @font-face {
+        font-family: "Dorna";
+        src: url("../public/fonts/Dorna/Dorna-Bold.ttf") format("truetype");
+    }
+    @font-face {
+        font-family: "YekanBakh";
+        src: url("../public/fonts/YekanBakh/YekanBakh-Regular.ttf") format("truetype");
+    }
+}
