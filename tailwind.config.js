@@ -10,6 +10,11 @@ export default {
         "Dorna" : "Dorna" ,
         "YekanBakh" : "YekanBakh"
       }
+      ,
+      colors : {
+        "primary" : "#AF47D2",
+        "secondary" : "#021959"
+      }
     },
   },
   plugins: [],
