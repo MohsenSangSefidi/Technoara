@@ -31,8 +31,9 @@ class ProductModel(models.Model):
     product_title = models.CharField(max_length=150, verbose_name='نام کالا')
     product_description = models.TextField(verbose_name='توضیحات کالا')
     product_price = models.IntegerField(verbose_name='قیمت کالا')
-    product_create_date = models.DateTimeField(auto_now=True, verbose_name='تاریخ ایجاد محصول')
-    product_slug = models.SlugField(unique=True, allow_unicode=True, db_index=True, verbose_name='عنوان در url')
+    product_sale_count = models.IntegerField(verbose_name='تعداد فروش کالا')
+    product_create_date = models.DateTimeField(auto_now=True, verbose_name='تاریخ ایجاد کالا')
+    product_slug = models.SlugField(null=True, unique=True, allow_unicode=True, db_index=True, verbose_name='عنوان در url')
 
     # Product Category
     product_category = models.ForeignKey(SubCategoryModel, on_delete=models.CASCADE, verbose_name='دسته یندی کالا')
@@ -50,6 +51,27 @@ class ProductModel(models.Model):
 
     def __str__(self):
         return self.product_title
+
+    def product_comment_count(self):
+        return self.productcommentmodel_set.count()
+
+    def product_rating(self):
+        query = self.productcommentmodel_set.all()
+        rating = 0
+        if query is not None:
+            for item in query:
+                rating += item.comment_rating
+            return rating / query.count()
+        else:
+            return 0
+
+    def product_discount_price(self):
+        discount = self.product_discount
+        if discount != 0:
+            price = (self.product_price * discount) / 100
+            return int(self.product_price - price)
+        else:
+            return 0
 
 
 class ProductFeatureModel(models.Model):
