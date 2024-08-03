@@ -38,7 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'Product_Module'
+    'Product_Module',
+    'User_Module'
 ]
 
 MIDDLEWARE = [
@@ -74,6 +75,8 @@ WSGI_APPLICATION = 'Config_Module.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
+
+AUTH_USER_MODEL = 'User_Module.UserModel'
 
 DATABASES = {
     'default': {

@@ -1,4 +1,5 @@
 from django.db import models
+from User_Module.models import UserModel
 
 
 class CategoryModel(models.Model):
@@ -74,3 +75,18 @@ class ProductImagesModel(models.Model):
 
     def __str__(self):
         return f'عکس شماره {self.id} : {self.product.product_title}'
+
+
+class ProductCommentModel(models.Model):
+    comment_text = models.TextField(verbose_name='متن کامنت')
+    comment_rating = models.IntegerField(verbose_name='امتیاز')
+    comment_product = models.ForeignKey(ProductModel, on_delete=models.CASCADE, verbose_name='محصول')
+    comment_user = models.ForeignKey(UserModel, on_delete=models.CASCADE, verbose_name='کاربر')
+    comment_create_date = models.DateTimeField(auto_now=True, verbose_name='تاریخ ایجاد')
+
+    class Meta:
+        verbose_name = 'کامنت'
+        verbose_name_plural = 'کامنت ها'
+
+    def __str__(self):
+        return f'{self.comment_product.product_title} : {self.comment_user.username}'
