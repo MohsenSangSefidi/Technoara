@@ -13,6 +13,7 @@ class ProductListSerializer(serializers.ModelSerializer):
             'product_title',
             'product_description',
             'product_price',
+            'product_sale_count',
             'product_create_date',
             'product_slug',
             'product_sub_category',
@@ -50,6 +51,7 @@ class ProductSerializer(serializers.ModelSerializer):
             'product_title',
             'product_description',
             'product_price',
+            'product_sale_count',
             'product_create_date',
             'product_slug',
             'product_discount',
@@ -103,3 +105,18 @@ class ProductSerializer(serializers.ModelSerializer):
                 data.append(feature)
 
         return data
+
+
+class ProductFilterSerializer(serializers.Serializer):
+    product_title = serializers.CharField(required=False)
+    category_filter = serializers.CharField(required=False)
+    price_filter_start = serializers.IntegerField(required=False)
+    price_filter_end = serializers.IntegerField(required=False)
+
+    class Meta:
+        fields = [
+            'product_title',
+            'category_filter',
+            'price_filter_start',
+            'price_filter_end'
+        ]
