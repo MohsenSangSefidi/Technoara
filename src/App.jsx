@@ -1,11 +1,10 @@
-import Topbar from "./components/Topbar/Topbar";
+import routes from "./routes";
+import { useRoutes } from "react-router-dom";
 
 function App() {
-  return (
-    <>
-      <Topbar />
-    </>
-  );
+  const router = useRoutes(routes);
+
+  return <>{router}</>;
 }
 
 export default App;
