@@ -8,7 +8,8 @@ export default {
     extend: {
       fontFamily : {
         "Dorna" : "Dorna" ,
-        "YekanBakh" : "YekanBakh"
+        "YekanBakh" : "YekanBakh",
+        "Kalame" : "Kalame"
       }
       ,
       colors : {
@@ -16,7 +17,8 @@ export default {
         "secondary" : "#021959"
       },
       screens : {
-        "xs" : "368px"
+        "xs" : "368px",
+        "sm" : "576px"
       }
     },
   },
