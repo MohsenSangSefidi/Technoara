@@ -2,13 +2,44 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base{
-    @font-face {
-        font-family: "Dorna";
-        src: url("../public/fonts/Dorna/Dorna-Bold.ttf") format("truetype");
-    }
-    @font-face {
-        font-family: "YekanBakh";
-        src: url("../public/fonts/YekanBakh/YekanBakh-Regular.ttf") format("truetype");
-    }
+@layer base {
+  @font-face {
+    font-family: "Dorna";
+    src: url("../public/fonts/Dorna/Dorna-Bold.ttf") format("truetype");
+  }
+  @font-face {
+    font-family: "YekanBakh";
+    src: url("../public/fonts/YekanBakh/YekanBakh-Regular.ttf") format("truetype")
+  }
+  @font-face {
+    font-family: "Kalame";
+    src: url("../public/fonts/Kalame/Kalame-Regular.ttf") format("truetype")
+  }
+}
+@layer components {
+  .swiper-pagination {
+    position: absolute;
+    top: 25px;
+    right: 25px;
+  }
+  .swiper-pagination-bullet {
+    background-color: white;
+    border-radius: 20px;
+  }
+  .swiper-pagination-bullet-active {
+    width: 20px;
+  }
+  .swiper-button-next{
+    color: aqua;
+    
+  }
+  .swiper-button-next::after{
+    display: none;
+  }
+  .swiper-button-prev::after{
+    display: none;
+  }
+  .swiper-button-prev{
+    color: red;
+  }
 }
