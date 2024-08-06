@@ -27,7 +27,8 @@ class ProductApiView(APIView):
             price_start = filter.validated_data.get('price_filter_start')
             price_end = filter.validated_data.get('price_filter_end')
 
-            if category or price_start or price_end:
+
+            if title or category or price_start or price_end:
                 category_obj = SubCategoryModel.objects.filter(sub_category_slug=category if category else '').first()
                 data = ProductModel.objects.filter(product_category_id=category_obj.id if category_obj else 0)
                 if data:
@@ -39,7 +40,7 @@ class ProductApiView(APIView):
                                                        product_price__lte=price_end if price_end else 99999999,
                                                        product_title__icontains=title if title else '')
 
-                serializer = ProductListSerializer(data, request, many=True).data
+                serializer = ProductListSerializer(data, many=True).data
                 return Response(serializer)
 
             else:
