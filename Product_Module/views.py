@@ -1,21 +1,23 @@
+from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.views import Response
 from rest_framework.generics import RetrieveAPIView
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import LimitOffsetPagination
+from rest_framework import status
 
 from django.utils.text import slugify
 
 from .authentication import TokenAuthentication
-from .serializers import ProductListSerializer, ProductSerializer, ProductFilterSerializer
+from .serializers import ProductListSerializer, ProductSerializer, ProductFilterSerializer, ProductCreateSerializer
 from .models import ProductModel, SubCategoryModel
 
 
 class ProductApiView(APIView):
-    # authentication_classes = [TokenAuthentication]
-    # permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
 
-    def get(self, request):
+    def get(self, request, *args, **kwargs):
         filter = ProductFilterSerializer(data=request.data)
         if filter.is_valid(raise_exception=True):
 
@@ -37,25 +39,36 @@ class ProductApiView(APIView):
                                                        product_price__lte=price_end if price_end else 99999999,
                                                        product_title__icontains=title if title else '')
 
-                serializer = ProductListSerializer(data, many=True).data
+                serializer = ProductListSerializer(data, request, many=True).data
                 return Response(serializer)
 
             else:
                 data = ProductModel.objects.filter(product_is_active=True)
-                serializer = ProductListSerializer(data, many=True).data
+                serializer = ProductListSerializer(data,  many=True).data
                 return Response(serializer)
 
-    def perform_create(self, serializer):
-        title = serializer.validated_data.get('product_title')
-        slug = serializer.validated_data.get('product_slug') or None
 
-        if slug is None:
+
+
+
+class CraeteProductApiView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    parser_classes = (MultiPartParser, FormParser)
+
+    def post(self, request, *args, **kwargs):
+        product = ProductCreateSerializer(data=request.data)
+        if product.is_valid(raise_exception=True):
+            title = product.validated_data.get('product_title')
             slug = slugify(title)
+            product.save(product_slug=slug)
 
-        serializer.save(slug=slug)
-
+        return Response({'detail': 'product created'}, status=status.HTTP_201_CREATED)
 
 class ProductDetailApiView(RetrieveAPIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
     queryset = ProductModel.objects.all()
     serializer_class = ProductSerializer
     lookup_field = 'pk'

@@ -20,7 +20,7 @@ class ProductListSerializer(serializers.ModelSerializer):
             'product_category',
             'product_discount',
             'product_discount_date',
-            'product_cover'
+            'product_cover_url'
         ]
 
     def get_product_sub_category(self, obj: ProductModel):
@@ -119,4 +119,20 @@ class ProductFilterSerializer(serializers.Serializer):
             'category_filter',
             'price_filter_start',
             'price_filter_end'
+        ]
+
+
+class ProductCreateSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = ProductModel
+        fields = [
+            'product_title',
+            'product_description',
+            'product_price',
+            'product_category',
+            'product_discount',
+            'product_discount_date',
+            'product_cover',
+            'product_slug'
         ]

@@ -47,16 +47,20 @@ class ProductModel(models.Model):
     def __str__(self):
         return self.product_title
 
+    def product_cover_url(self):
+        return f'http://127.0.0.1:8000/{self.product_cover.url}'
+
     def product_comment_count(self):
         return self.productcommentmodel_set.count()
 
     def product_rating(self):
         query = self.productcommentmodel_set.all()
-        rating = 0
-        if query is not None:
-            for item in query:
-                rating += item.comment_rating
-            return rating / query.count()
+        if query.count() != 0:
+            rating = 0
+            if query is not None:
+                for item in query:
+                    rating += item.comment_rating
+                return rating / query.count()
         else:
             return 0
 
