@@ -30,7 +30,7 @@ export default function Header() {
             ورود/ ثبت نام
           </button>
           <button className="w-[45%] font-YekanBakh bg-primary shadow-md shadow-primary text-white rounded-md p-3">
-            <span className="font-YekanBakh">سبد خرید <span className="font-Kalame">0</span></span>
+            <span className="font-Kalame">سبد خرید <span>0</span></span>
           </button>
         </div>
       </div>
@@ -105,7 +105,7 @@ export default function Header() {
               <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
             </svg>
             </div>
-            <button className="w-[6rem] md:w-[6rem] font-YekanBakh bg-primary shadow-md shadow-primary text-white rounded-md p-2">خرید 0</button>
+            <button className="w-[6rem] md:w-[6rem] font-Kalame bg-primary shadow-md shadow-primary text-white rounded-md p-2">خرید 0</button>
            </div>
         </div>
         {/* Mobile Menu */}
