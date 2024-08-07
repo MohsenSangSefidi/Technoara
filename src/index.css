@@ -29,17 +29,16 @@
   .swiper-pagination-bullet-active {
     width: 20px;
   }
-  .swiper-button-next{
-    color: aqua;
-    
-  }
   .swiper-button-next::after{
     display: none;
   }
   .swiper-button-prev::after{
     display: none;
   }
+  .swiper-button-next{
+    color: #212529;
+  }
   .swiper-button-prev{
-    color: red;
+    color: #212529;
   }
 }
