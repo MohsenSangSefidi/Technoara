@@ -4,6 +4,8 @@ import Banner from '../../components/Banner/Banner'
 import CategoryBox from '../../components/CategoryBox/CategoryBox'
 import DiscountedCarts from '../../components/ِDiscountedCarts/DiscountedCarts'
 import PopularCategory from '../../components/PopularCategory/PopularCategory'
+import NewProducts from '../../components/NewProducts/NewProducts'
+import Mobile from '../../components/Mobiles/Mobile'
 
 export default function Index() {
   return (
@@ -16,6 +18,12 @@ export default function Index() {
           <CategoryBox/>
         </div>
         <PopularCategory/>
+        <NewProducts />
+        <Mobile/>
+        <br />
+        <br />
+        <br />
+        <br />
         <br />
         <br />
         <br />
