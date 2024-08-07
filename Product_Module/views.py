@@ -9,8 +9,9 @@ from rest_framework import status
 from django.utils.text import slugify
 
 from .authentication import TokenAuthentication
-from .serializers import ProductListSerializer, ProductSerializer, ProductFilterSerializer, ProductCreateSerializer
-from .models import ProductModel, SubCategoryModel
+from .serializers import (ProductListSerializer, ProductSerializer, ProductFilterSerializer, ProductCreateSerializer,
+                          ProductFeatureSerializer, ProductImagesSerializer)
+from .models import ProductModel, SubCategoryModel, ProductFeatureModel, ProductImagesModel
 
 
 class ProductApiView(APIView):
@@ -52,19 +53,61 @@ class ProductApiView(APIView):
 
 
 
-class CraeteProductApiView(APIView):
+class CreateProductApiView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
     parser_classes = (MultiPartParser, FormParser)
 
     def post(self, request, *args, **kwargs):
         product = ProductCreateSerializer(data=request.data)
+
         if product.is_valid(raise_exception=True):
             title = product.validated_data.get('product_title')
             slug = slugify(title)
-            product.save(product_slug=slug)
 
-        return Response({'detail': 'product created'}, status=status.HTTP_201_CREATED)
+            check_product = ProductModel.objects.filter(product_slug=slug).first()
+
+            if check_product is None:
+                product.save(product_slug=slug)
+                product = ProductModel.objects.filter(product_slug=slug).first()
+            else:
+                return Response({'detail' : 'Product already exists'}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = ProductSerializer(product).data
+
+        return Response(serializer, status=status.HTTP_201_CREATED)
+
+
+class CreateProductFeatureApiView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        data = ProductFeatureSerializer(data=request.data)
+        if data.is_valid(raise_exception=True):
+            product_id = data.validated_data.get('feature_product')
+            feature_title = data.validated_data.get('feature_title')
+            product = ProductModel.objects.filter(id=product_id.id).first()
+            feature = product.productfeaturemodel_set.filter(feature_title=feature_title).first()
+            if feature is None:
+                data.save()
+                return Response(data.data, status=status.HTTP_201_CREATED)
+            else:
+                return Response({'detail' : 'Feature already exists'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class CreateProductImagesApiView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    parser_classes = (MultiPartParser, FormParser)
+
+    def post(self, request, *args, **kwargs):
+        data = ProductImagesSerializer(data=request.data)
+        if data.is_valid(raise_exception=True):
+            data.save()
+            return Response(data.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response({'detail' : 'Bad Request'}, status=status.HTTP_400_BAD_REQUEST)
 
 class ProductDetailApiView(RetrieveAPIView):
     authentication_classes = [TokenAuthentication]

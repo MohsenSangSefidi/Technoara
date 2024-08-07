@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import ProductModel
+from .models import ProductModel, ProductFeatureModel, ProductImagesModel
 
 
 class ProductListSerializer(serializers.ModelSerializer):
@@ -59,7 +59,7 @@ class ProductSerializer(serializers.ModelSerializer):
             'product_discount_date',
             'product_comment_count',
             'product_rating',
-            'product_cover',
+            'product_cover_url',
             'product_sub_category',
             'product_category',
             'product_images',
@@ -123,7 +123,6 @@ class ProductFilterSerializer(serializers.Serializer):
 
 
 class ProductCreateSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = ProductModel
         fields = [
@@ -134,5 +133,44 @@ class ProductCreateSerializer(serializers.ModelSerializer):
             'product_discount',
             'product_discount_date',
             'product_cover',
-            'product_slug'
         ]
+
+
+class ProductFeatureSerializer(serializers.ModelSerializer):
+    feature_product = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = ProductFeatureModel
+        fields = [
+            'id',
+            'feature_title',
+            'feature_description',
+            'feature_product'
+        ]
+
+    def get_feature_product(self, obj: ProductFeatureModel):
+        return {
+            'product_id': obj.feature_product.id,
+            'product_title': obj.feature_product.product_title,
+            'product_slug': obj.feature_product.product_slug
+        }
+
+
+class ProductImagesSerializer(serializers.ModelSerializer):
+    product_detail = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = ProductImagesModel
+        fields = [
+            'id',
+            'product_img',
+            'product',
+            'product_detail'
+        ]
+
+    def get_product_detail(self, obj: ProductImagesModel):
+        return {
+            'product_id': obj.product.id,
+            'product_title': obj.product.product_title,
+            'product_slug': obj.product.product_slug
+        }

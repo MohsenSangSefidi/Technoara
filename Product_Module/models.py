@@ -97,6 +97,9 @@ class ProductImagesModel(models.Model):
     def __str__(self):
         return f'عکس شماره {self.id} : {self.product.product_title}'
 
+    def product_img_url(self):
+        return f'http://127.0.0.1:8000/{self.product_img.url}'
+
 
 class ProductCommentModel(models.Model):
     comment_text = models.TextField(verbose_name='متن کامنت')
