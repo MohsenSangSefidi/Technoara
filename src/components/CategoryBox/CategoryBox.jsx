@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 export default function CategoryBox() {
   return (
-    <div className="flex items-start justify-between mt-10 w-[100%] xl:w-[58%] xl:mt-0 h-[95%]">
+    <div className="flex items-start justify-between mt-[80px] w-[100%] xl:w-[58%] xl:mt-0 h-[95%]">
       <div className="h-[100%] w-[30%]">
       <Link to={"category/speaker"}>
         <div className="overflow-hidden rounded-3xl h-[100%]">
