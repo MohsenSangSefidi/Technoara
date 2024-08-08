@@ -14,7 +14,7 @@ export default function NewProducts() {
       <div className="mt-20">
         <TitleBox title={"محصولات جدید"} link={"مشاهده همه"} />
       </div>
-      <div className="flex items-center justify-between w-[90%] mx-auto mt-10">
+      <div className="flex items-center justify-between w-[100%] mx-auto mt-10">
         <Swiper 
         className="p-2" 
         direction="horizontal" 
@@ -38,7 +38,7 @@ export default function NewProducts() {
           1200: {
             slidesPerView: 4,
             spaceBetween:25,
-            width:1400
+            width:1600
           },
         }}
         >
