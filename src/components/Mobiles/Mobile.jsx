@@ -4,22 +4,38 @@ import ProductsWithDiscount from '../ProductsWithDiscount/ProductsWithDiscount'
 import ProductsWithNoDiscounts from '../ProductsWithNoDiscounts/ProductsWithNoDiscounts'
 import {Swiper,SwiperSlide} from "swiper/react";
 import { Autoplay } from 'swiper/modules';
+import "swiper/css"
 
 export default function Mobile() {
   return (
     <section className='mt-20'>
       <TitleBox title={"موبایل ها"} link={"مشاهده همه"} />
-      <div className='flex items-center mt-10 justify-between w-[100%] h-full'>
-       <div className='w-[20%] h-[30rem] rounded-3xl overflow-hidden shadow-2xl'>
+      <div className='flex flex-col lg:flex-row items-center lg:mt-2 xl:mt-16 justify-between w-[100%] h-full'>
+       <div className='w-full hidden lg:block lg:w-[20%] xl:w-[25%] h-[40rem] lg:h-[38rem] xl:h-[33rem] rounded-3xl overflow-hidden shadow-[#DF2648] shadow-xl'>
          <div className='w-[100%] h-[100%]'>
             <img src="public/images/mobile/Mobile.jpg" className='w-[100%] h-[100%]' alt="" />
          </div>
        </div>
-       <div className='w-[75%] mx-auto flex items-center justify-between'>
+       <div className='w-[100%] h-[40rem] lg:h-[auto] xl:w-[70%] mx-auto flex items-center justify-between'>
            <Swiper
             className='p-5'
             modules={[Autoplay]}
-            slidesPerView={3}
+            slidesPerView={1}
+            breakpoints={{
+              576:{
+                slidesPerView:1
+              },
+              768:{
+                slidesPerView:2
+              },
+              // 1024:{
+              //   slidesPerView:2,
+              // },
+              1200:{
+                slidesPerView:3,
+                width:1200
+              }
+            }}
             spaceBetween={30}
             loop="true"
             autoplay={{
