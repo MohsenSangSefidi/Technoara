@@ -78,7 +78,7 @@ export default function Header() {
       </div>
 
       {/* Mobile */}
-      <div className="flex flex-col lg:hidden">
+      <div className="fixed top-0 left-0 right-0 z-20 p-5 shadow-lg bg-white flex flex-col lg:hidden">
         <div className="flex items-center justify-between w-full">
           <div onClick={() => setOpenMobileMenu(true)} className="w-13 h-11 cursor-pointer shadow-lg p-2 rounded-sm">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-full h-full">
