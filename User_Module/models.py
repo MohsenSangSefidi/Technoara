@@ -14,3 +14,34 @@ class UserModel(AbstractUser):
 
     def __str__(self):
         return f'{self.username} : {self.email}'
+
+    def user_avatar_url(self):
+        try:
+            return f'http://127.0.0.1:8000/{self.user_avatar.url}'
+        except:
+            return ''
+
+
+class RoleModel(models.Model):
+    name = models.CharField(max_length=50)
+
+    class Meta:
+        verbose_name = 'نقش'
+        verbose_name_plural = 'نقش ها'
+
+    def __str__(self):
+        return self.name
+
+
+class UserRoleModel(models.Model):
+    user = models.ForeignKey(UserModel, on_delete=models.CASCADE)
+    role = models.ForeignKey(RoleModel, on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name = 'نقش کاربر'
+        verbose_name_plural = 'نقش های کاربران'
+        unique_together = ('user', 'role')
+
+    def __str__(self):
+        return f'{self.user.username} : {self.role.name}'
+

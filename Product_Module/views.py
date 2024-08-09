@@ -9,8 +9,7 @@ from rest_framework import status
 from django.utils.text import slugify
 
 from .authentication import TokenAuthentication
-from .serializers import (ProductListSerializer, ProductSerializer, ProductFilterSerializer, ProductCreateSerializer,
-                          ProductFeatureSerializer, ProductImagesSerializer)
+from .serializers import *
 from .models import ProductModel, SubCategoryModel, ProductFeatureModel, ProductImagesModel
 
 
@@ -27,7 +26,6 @@ class ProductApiView(APIView):
             category = filter.validated_data.get('category_filter')
             price_start = filter.validated_data.get('price_filter_start')
             price_end = filter.validated_data.get('price_filter_end')
-
 
             if title or category or price_start or price_end:
                 category_obj = SubCategoryModel.objects.filter(sub_category_slug=category if category else '').first()
@@ -46,11 +44,11 @@ class ProductApiView(APIView):
 
             else:
                 data = ProductModel.objects.filter(product_is_active=True)
-                serializer = ProductListSerializer(data,  many=True).data
+                serializer = ProductListSerializer(data, many=True).data
                 return Response(serializer)
 
-
-
+        else:
+            return Response(filter.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class CreateProductApiView(APIView):
@@ -70,12 +68,12 @@ class CreateProductApiView(APIView):
             if check_product is None:
                 product.save(product_slug=slug)
                 product = ProductModel.objects.filter(product_slug=slug).first()
+                serializer = ProductSerializer(product).data
+                return Response(serializer, status=status.HTTP_201_CREATED)
             else:
-                return Response({'detail' : 'Product already exists'}, status=status.HTTP_400_BAD_REQUEST)
-
-        serializer = ProductSerializer(product).data
-
-        return Response(serializer, status=status.HTTP_201_CREATED)
+                return Response({'detail': 'Product already exists'}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response(product.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class CreateProductFeatureApiView(APIView):
@@ -83,17 +81,19 @@ class CreateProductFeatureApiView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
-        data = ProductFeatureSerializer(data=request.data)
-        if data.is_valid(raise_exception=True):
-            product_id = data.validated_data.get('feature_product')
-            feature_title = data.validated_data.get('feature_title')
+        serializer = ProductFeatureSerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            product_id = serializer.validated_data.get('feature_product')
+            feature_title = serializer.validated_data.get('feature_title')
             product = ProductModel.objects.filter(id=product_id.id).first()
             feature = product.productfeaturemodel_set.filter(feature_title=feature_title).first()
             if feature is None:
-                data.save()
-                return Response(data.data, status=status.HTTP_201_CREATED)
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
             else:
-                return Response({'detail' : 'Feature already exists'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'detail': 'Feature already exists'}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class CreateProductImagesApiView(APIView):
@@ -102,12 +102,26 @@ class CreateProductImagesApiView(APIView):
     parser_classes = (MultiPartParser, FormParser)
 
     def post(self, request, *args, **kwargs):
-        data = ProductImagesSerializer(data=request.data)
-        if data.is_valid(raise_exception=True):
-            data.save()
-            return Response(data.data, status=status.HTTP_201_CREATED)
+        serializer = ProductImagesSerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
-            return Response({'detail' : 'Bad Request'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class CreateCommentApiView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        serializer = ProductCommentSerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class ProductDetailApiView(RetrieveAPIView):
     authentication_classes = [TokenAuthentication]

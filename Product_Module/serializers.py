@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import ProductModel, ProductFeatureModel, ProductImagesModel
+from .models import ProductModel, ProductFeatureModel, ProductImagesModel, ProductCommentModel
 
 
 class ProductListSerializer(serializers.ModelSerializer):
@@ -87,7 +87,7 @@ class ProductSerializer(serializers.ModelSerializer):
             for item in query:
                 image = {
                     'product_image_id': item.id,
-                    'product_image_url': item.product_img.url
+                    'product_image_url': item.product_img_url()
                 }
                 data.append(image)
 
@@ -174,3 +174,14 @@ class ProductImagesSerializer(serializers.ModelSerializer):
             'product_title': obj.product.product_title,
             'product_slug': obj.product.product_slug
         }
+
+
+class ProductCommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductCommentModel
+        fields = [
+            'comment_text',
+            'comment_rating',
+            'comment_product',
+            'comment_user'
+        ]
