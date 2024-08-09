@@ -41,4 +41,7 @@
   .swiper-button-prev{
     color: #212529;
   }
+  .article-box__bg{
+    background-image:linear-gradient(180deg, rgba(2, 25, 89, 0) 0%, #492AB6 100%);
+  }
 }
