@@ -127,11 +127,15 @@ class CreateCommentApiView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
-        serializer = ProductCommentSerializer(data=request.data)
+        serializer = CreateProductCommentSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             comment_rating = serializer.validated_data.get('comment_rating')
             if comment_rating <= 5:
                 serializer.save()
+                comment_id = serializer.data['id']
+                print(comment_id)
+                comment = ProductCommentModel.objects.filter(id=comment_id).first()
+                serializer = ProductCommentSerializer(comment)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             else:
                 return Response({'detail': 'The rating is more than 5'}, status=status.HTTP_400_BAD_REQUEST)

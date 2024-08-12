@@ -197,9 +197,40 @@ class CreateProductImageSerializer(serializers.ModelSerializer):
 
 
 class ProductCommentSerializer(serializers.ModelSerializer):
+    comment_product = serializers.SerializerMethodField(read_only=True)
+    comment_user = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = ProductCommentModel
         fields = [
+            'id',
+            'comment_text',
+            'comment_rating',
+            'comment_create_date',
+            'comment_product',
+            'comment_user'
+        ]
+
+    def get_comment_product(self, obj: ProductCommentModel):
+        return {
+            'product_id': obj.comment_product.id,
+            'product_title': obj.comment_product.product_title,
+            'product_slug': obj.comment_product.product_slug
+        }
+
+    def get_comment_user(self, obj: ProductCommentModel):
+        return {
+            'user_id': obj.comment_user.id,
+            'user_name': obj.comment_user.username,
+            'user_email': obj.comment_user.email
+        }
+
+
+class CreateProductCommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductCommentModel
+        fields = [
+            'id',
             'comment_text',
             'comment_rating',
             'comment_product',
