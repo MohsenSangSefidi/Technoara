@@ -19,6 +19,7 @@ class ProductListSerializer(serializers.ModelSerializer):
             'product_sub_category',
             'product_category',
             'product_discount',
+            'product_discount_price',
             'product_discount_date',
             'product_cover_url'
         ]
@@ -99,8 +100,8 @@ class ProductSerializer(serializers.ModelSerializer):
         if query is not None:
             for item in query:
                 feature = {
-                    'feature_title' : item.feature_title,
-                    'featuer_description' : item.feature_description
+                    'feature_title': item.feature_title,
+                    'featuer_description': item.feature_description
                 }
                 data.append(feature)
 
@@ -137,7 +138,7 @@ class ProductCreateSerializer(serializers.ModelSerializer):
 
 
 class ProductFeatureSerializer(serializers.ModelSerializer):
-    feature_product = serializers.SerializerMethodField(read_only=True)
+    feature_product = serializers.SerializerMethodField()
 
     class Meta:
         model = ProductFeatureModel
@@ -156,6 +157,17 @@ class ProductFeatureSerializer(serializers.ModelSerializer):
         }
 
 
+class CreateProductFeatureSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductFeatureModel
+        fields = [
+            'id',
+            'feature_title',
+            'feature_description',
+            'feature_product'
+        ]
+
+
 class ProductImagesSerializer(serializers.ModelSerializer):
     product_detail = serializers.SerializerMethodField(read_only=True)
 
@@ -163,17 +175,25 @@ class ProductImagesSerializer(serializers.ModelSerializer):
         model = ProductImagesModel
         fields = [
             'id',
-            'product_img',
-            'product',
+            'product_img_url',
             'product_detail'
         ]
 
     def get_product_detail(self, obj: ProductImagesModel):
         return {
-            'product_id': obj.product.id,
+            'product_id' : obj.product.id,
             'product_title': obj.product.product_title,
             'product_slug': obj.product.product_slug
         }
+
+class CreateProductImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductImagesModel
+        fields = [
+            'id',
+            'product_img',
+            'product'
+        ]
 
 
 class ProductCommentSerializer(serializers.ModelSerializer):

@@ -86,7 +86,6 @@ class LoginUserAPIView(APIView):
             password = serializer.validated_data.get('password')
             user = UserModel.objects.filter(email=email).first()
             if user is not None:
-                print(user.check_password(password), password)
                 if user.check_password(password):
                     if user.is_active:
                         token, created = Token.objects.get_or_create(user=user)

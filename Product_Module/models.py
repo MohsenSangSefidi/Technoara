@@ -35,7 +35,7 @@ class ProductModel(models.Model):
     product_create_date = models.DateTimeField(auto_now=True, verbose_name='تاریخ ایجاد کالا')
     product_category = models.ForeignKey(SubCategoryModel, on_delete=models.CASCADE, verbose_name='دسته یندی کالا')
     product_discount = models.IntegerField(default=0, verbose_name='تخفیف کالا')
-    product_discount_date = models.DateTimeField(null=True, blank=True, verbose_name='تاریخ تخفیف کالا')
+    product_discount_date = models.DateTimeField(auto_now=True, verbose_name='تاریخ تخفیف کالا')
     product_cover = models.ImageField(null=True, upload_to='product-cover/', verbose_name='عکس کالا')
     product_is_active = models.BooleanField(default=True, verbose_name='فعال / غیر فعال')
     product_slug = models.SlugField(null=True, unique=True, allow_unicode=True, db_index=True, verbose_name='عنوان در url')

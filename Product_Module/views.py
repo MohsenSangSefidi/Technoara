@@ -3,7 +3,7 @@ from rest_framework.views import Response
 from rest_framework.generics import RetrieveAPIView
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.pagination import PageNumberPagination
 from rest_framework import status
 
 from django.utils.text import slugify
@@ -39,13 +39,19 @@ class ProductApiView(APIView):
                                                        product_price__lte=price_end if price_end else 99999999,
                                                        product_title__icontains=title if title else '')
 
-                serializer = ProductListSerializer(data, many=True).data
-                return Response(serializer)
+                paginator = PageNumberPagination()
+                paginator.page_size = 2
+                results_page = paginator.paginate_queryset(data, request)
+                serializer = ProductListSerializer(results_page, many=True)
+                return paginator.get_paginated_response(serializer.data)
 
             else:
                 data = ProductModel.objects.filter(product_is_active=True)
-                serializer = ProductListSerializer(data, many=True).data
-                return Response(serializer)
+                paginator = PageNumberPagination()
+                paginator.page_size = 2
+                results_page = paginator.paginate_queryset(data, request)
+                serializer = ProductListSerializer(results_page, many=True)
+                return paginator.get_paginated_response(serializer.data)
 
         else:
             return Response(filter.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -81,7 +87,7 @@ class CreateProductFeatureApiView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
-        serializer = ProductFeatureSerializer(data=request.data)
+        serializer = CreateProductFeatureSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             product_id = serializer.validated_data.get('feature_product')
             feature_title = serializer.validated_data.get('feature_title')
@@ -89,9 +95,12 @@ class CreateProductFeatureApiView(APIView):
             feature = product.productfeaturemodel_set.filter(feature_title=feature_title).first()
             if feature is None:
                 serializer.save()
+                feature = ProductFeatureModel.objects.filter(feature_product=product_id, feature_title=feature_title).first()
+                serializer = ProductFeatureSerializer(feature)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
+
             else:
-                return Response({'detail': 'Feature already exists'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'detail': 'Product does not exist'}, status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -102,9 +111,12 @@ class CreateProductImagesApiView(APIView):
     parser_classes = (MultiPartParser, FormParser)
 
     def post(self, request, *args, **kwargs):
-        serializer = ProductImagesSerializer(data=request.data)
+        serializer = CreateProductImageSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             serializer.save()
+            img_id = serializer.data['id']
+            img = ProductImagesModel.objects.filter(id=img_id).first()
+            serializer = ProductImagesSerializer(img)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -117,8 +129,12 @@ class CreateCommentApiView(APIView):
     def post(self, request, *args, **kwargs):
         serializer = ProductCommentSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            comment_rating = serializer.validated_data.get('comment_rating')
+            if comment_rating <= 5:
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            else:
+                return Response({'detail': 'The rating is more than 5'}, status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
