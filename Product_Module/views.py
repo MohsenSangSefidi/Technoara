@@ -13,7 +13,7 @@ from .serializers import *
 from .models import ProductModel, SubCategoryModel, ProductFeatureModel, ProductImagesModel
 
 
-class ProductApiView(APIView):
+class FilterProductApiView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
@@ -55,6 +55,19 @@ class ProductApiView(APIView):
 
         else:
             return Response(filter.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class GetProductApiView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, slug, *args, **kwargs):
+        product = ProductModel.objects.filter(product_slug=slug).first()
+        if product is not None:
+            serializer = ProductSerializer(product)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response({'detail': 'Product does not exist'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class CreateProductApiView(APIView):
@@ -143,10 +156,11 @@ class CreateCommentApiView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class ProductDetailApiView(RetrieveAPIView):
+class GetCategoryApiView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
-    queryset = ProductModel.objects.all()
-    serializer_class = ProductSerializer
-    lookup_field = 'pk'
+    def get(self, request, *args, **kwargs):
+        categories = CategoryModel.objects.all()
+        serializer = CategorySerializer(categories, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

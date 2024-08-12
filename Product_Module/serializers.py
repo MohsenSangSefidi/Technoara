@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import ProductModel, ProductFeatureModel, ProductImagesModel, ProductCommentModel
+from .models import ProductModel, ProductFeatureModel, ProductImagesModel, ProductCommentModel, CategoryModel
 
 
 class ProductListSerializer(serializers.ModelSerializer):
@@ -236,3 +236,26 @@ class CreateProductCommentSerializer(serializers.ModelSerializer):
             'comment_product',
             'comment_user'
         ]
+
+
+class CategorySerializer(serializers.ModelSerializer):
+    sub_categories = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = CategoryModel
+        fields = [
+            'id',
+            'category_title',
+            'category_slug',
+            'sub_categories'
+        ]
+
+    def get_sub_categories(self, obj: CategoryModel):
+        list = []
+        for item in obj.subcategorymodel_set.all():
+            list.append({
+                'sub_category_id': item.id,
+                'sub_category_title': item.sub_category_title,
+                'sub_category_slug': item.sub_category_slug
+            })
+        return list
