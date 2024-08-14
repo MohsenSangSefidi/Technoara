@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom'
 
 export default function ArticleBox() {
   return (
-    <div className='flex items-start justify-cente h-auto gap-4 border-b-2 pb-[1.5rem]'>
-       <div className='w-[30%] relative h-[100%] rounded-2xl overflow-hidden'>
+    <div className='w-full flex flex-col md:flex-row items-start justify-start md:justify-between h-auto gap-4 border-b-2 pb-[1.5rem]'>
+       <div className='w-[40%] relative mx-auto md:mx-0 h-[7rem] md:h-[100%] rounded-2xl overflow-hidden'>
          <img src="public/images/articles/3-11.jpg" alt="" className='w-[100%] h-[100%]'/>
            <div className='absolute bottom-1 right-2 text-white text-[0.8rem] flex items-center justify-center gap-1'>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
@@ -13,10 +13,10 @@ export default function ArticleBox() {
             <span className='font-YekanBakh'>15 دقیقه</span>
          </div>
        </div>
-       <div className='flex flex-col gap-4'>
+       <div className='flex flex-col gap-4 w-full md:w-[65%]'>
           <h3 className='font-YekanBakh text-secondary text-[0.8rem] font-bold'>دلایلی برای خرید گوشی ناتینگ فون یک</h3>
           <p className='font-YekanBakh leading-6 text-[0.7rem] font-bold'>دلایل خرید گوشی ۱   بسیار قانع‌کننده‌ هستند،  توجه به نوع را در اختیار کاربر قرار می‌دهد.</p>
-          <div className='flex items-center justify-between'>
+          <div className='flex xs:flex-col xs:gap-5 sm:flex-row sm:gap-0 items-center justify-between'>
             <div className='flex items-center justify-center text-[0.8rem] gap-2'>
               <div className='flex items-center justify-center gap-2'>
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
