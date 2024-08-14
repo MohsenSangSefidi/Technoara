@@ -2,14 +2,14 @@ import React from 'react'
 
 export default function CartDiscount() {
   return (
-    <div className='bg-[#F04055] rounded-xl p-5 h-[95%]'>
+    <div className='bg-[#F04055] rounded-xl p-5 h-[95%] w-full lg:w-[100%]'>
     <div className='flex flex-col lg:flex-row items-center justify-between'>
-    <div className='w-[100%] lg:w-[50%] p-10 flex flex-col items-center'>
+     <div className='w-[100%] lg:w-[50%] p-10 flex flex-col items-center'>
        <h4 className='text-[1.2rem] font-Dorna text-white font-bold'>شگفت انگیز شو</h4>
        <div className='w-[100%] relative h-[100%]'>
-        <img src="../../../public/images/back-amazing.png" className='h-[100%] w-[100%]' alt="" />
+        <img src="public/images/back-amazing.png" className='h-[100%] w-[100%]' alt="" />
         <div className='w-[45%] h-[45%] absolute top-[40%] right-[30%] sm:right-[30%] sm:h-[45%] sm:w-[45%] xl:w-[45%] xl:h-[50%]'>
-          <img src="../../../public/images/discountproducts/1-1.png" className='w-[100%] h-[100%]' alt="" />
+          <img src="public/images/discountproducts/1-1.png" className='w-[100%] h-[100%]' alt="" />
         </div>
         <div className='bg-[#F04055] absolute top-[40%] left-[30%] p-3 xl:p-2 xl:top-[45%] xl:left-[20%] flex shadow-xl items-center justify-center rounded-r-[25%]'>
             <p className='font-Kalame text-white'>%67</p>
