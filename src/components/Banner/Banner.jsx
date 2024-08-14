@@ -6,7 +6,7 @@ import 'swiper/css/pagination';
 
 export default function Banner() {
   return (
-    <div className="w-[100%] xs:h-[15rem] sm:h-[20rem] lg:h-[30rem]">
+    <div className="w-[100%] xs:h-[15rem] sm:h-[20rem] lg:h-[30rem] mt-[7rem] lg:mt-0">
       <Swiper 
         className="h-[100%]"
         spaceBetween={50}
