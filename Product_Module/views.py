@@ -95,6 +95,17 @@ class CreateProductApiView(APIView):
             return Response(product.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+class GetProductCommentsApiView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, slug, *args, **kwargs):
+        product = ProductModel.objects.filter(product_slug=slug).first()
+        comments = ProductCommentModel.objects.filter(comment_product=product)
+        serializer = ProductCommentSerializer(comments, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
 class CreateProductFeatureApiView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
