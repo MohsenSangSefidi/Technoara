@@ -1,7 +1,6 @@
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.views import APIView, Response
 from rest_framework.generics import RetrieveAPIView
-from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 
@@ -9,8 +8,12 @@ from django.utils.crypto import get_random_string
 from django.contrib.auth import authenticate, login, logout
 from Utils.poll import verify_code
 from .authentication import TokenAuthentication
-from .serializers import GetUserSerializer, ActiveUserSerializer, LoginUserSerializer, RegisterUserSerializer
+from .serializers import (GetUserSerializer, ActiveUserSerializer, LoginUserSerializer, RegisterUserSerializer,
+                          SendVerifyCodeSerializer)
 from .models import UserModel
+from django.conf import settings
+from django.core.mail import send_mail
+
 
 
 class GetUserAPIView(RetrieveAPIView):
@@ -40,10 +43,26 @@ class RegisterUserAPIView(APIView):
             if check_user is None:
                 user = UserModel(username=username, first_name=first_name, last_name=last_name, email=email, is_active=False, user_token=get_random_string(50), user_verify_code=verify_code(), user_avatar=avatar)
                 user.set_password(password)
-                print(user.password, password)
                 user.save()
+
+                HOST_EMAIL = settings.EMAIL_HOST_USER
+                user_email = user.email
+                detail = ''
+
+                try:
+                    send_mail(
+                        "Verify Code",
+                        f"It's your Code : {user.user_verify_code}",
+                        HOST_EMAIL,
+                        [user_email],
+                        fail_silently=False,
+                    )
+                    detail = "Email Sent"
+                except:
+                    detail = 'Can\'t send email'
+
                 serializer = GetUserSerializer(user)
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
+                return Response({'detail': detail, 'user-detail': serializer.data}, status=status.HTTP_201_CREATED)
             else:
                 return Response({'detail': 'User Already Exists'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -88,16 +107,54 @@ class LoginUserAPIView(APIView):
             if user is not None:
                 if user.check_password(password):
                     if user.is_active:
-                        token, created = Token.objects.get_or_create(user=user)
-                        user.user_token = token.key
+                        user.user_token = get_random_string(60)
                         user.save()
                         serializer = GetUserSerializer(user)
-                        return Response({'token': token.key, 'user-detail' : serializer.data}, status=status.HTTP_200_OK)
+                        return Response({'token': user.user_token, 'user-detail' : serializer.data}, status=status.HTTP_200_OK)
                     else:
                         return Response({'detail': 'Account Disabale'}, status=status.HTTP_403_FORBIDDEN)
                 else:
                     return Response({'detail': 'Invalid Password'}, status=status.HTTP_400_BAD_REQUEST)
             else:
                 return Response({'detail': 'Invalid Credentials'}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class SendVerifyCodeAPIView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        serializer = SendVerifyCodeSerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            user_token = serializer.validated_data.get('user_token')
+            email = serializer.validated_data.get('email')
+
+            user = UserModel.objects.filter(user_token=user_token, email=email).first()
+
+            if user is not None:
+                user.user_verify_code = verify_code()
+                user_email = user.email
+                user.save()
+
+                HOST_EMAIL = settings.EMAIL_HOST_USER
+                detail = ''
+
+                try:
+                    send_mail(
+                        "Verify Code",
+                        f"It's your Code : {user.user_verify_code}",
+                        HOST_EMAIL,
+                        [user_email],
+                        fail_silently=False,
+                    )
+                    detail = "Email Sent"
+                except:
+                    detail = 'Can\'t send email'
+
+                return Response({'detail': detail}, status=status.HTTP_200_OK)
+            else:
+                return Response({'detail': 'USer Not Found'}, status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

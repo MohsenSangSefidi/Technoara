@@ -55,3 +55,14 @@ class LoginUserSerializer(serializers.Serializer):
             'email',
             'password'
         ]
+
+
+class SendVerifyCodeSerializer(serializers.Serializer):
+    user_token = serializers.CharField(required=True)
+    email = serializers.EmailField(required=True)
+
+    class Meta:
+        fields = [
+            'user_token',
+            'email'
+        ]

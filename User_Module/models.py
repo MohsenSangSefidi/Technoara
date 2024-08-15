@@ -7,6 +7,7 @@ class UserModel(AbstractUser):
     user_create_date = models.DateTimeField(auto_now=True, verbose_name='تاریخ عضویت')
     user_verify_code = models.IntegerField(null=True, blank=True, verbose_name='کد تایید')
     user_token = models.CharField(null=True, blank=True, max_length=150, verbose_name='توکن')
+    email = models.EmailField(unique=True, verbose_name='ایمیل')
 
     class Meta:
         verbose_name = 'کاربر'
