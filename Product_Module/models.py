@@ -29,13 +29,13 @@ class SubCategoryModel(models.Model):
 
 class ProductModel(models.Model):
     product_title = models.CharField(max_length=150, verbose_name='نام کالا')
-    product_description = models.TextField(verbose_name='توضیحات کالا')
+    product_description = models.TextField(null=True, blank=True, verbose_name='توضیحات کالا')
     product_price = models.IntegerField(verbose_name='قیمت کالا')
     product_sale_count = models.IntegerField(default=0, verbose_name='تعداد فروش کالا')
     product_create_date = models.DateTimeField(auto_now=True, verbose_name='تاریخ ایجاد کالا')
     product_category = models.ForeignKey(SubCategoryModel, on_delete=models.CASCADE, verbose_name='دسته یندی کالا')
     product_discount = models.IntegerField(default=0, verbose_name='تخفیف کالا')
-    product_discount_date = models.DateTimeField(auto_now=True, verbose_name='تاریخ تخفیف کالا')
+    product_discount_date = models.DateTimeField(null=True, blank=True, verbose_name='تاریخ تخفیف کالا')
     product_cover = models.ImageField(null=True, upload_to='product-cover/', verbose_name='عکس کالا')
     product_is_active = models.BooleanField(default=True, verbose_name='فعال / غیر فعال')
     product_slug = models.SlugField(null=True, unique=True, allow_unicode=True, db_index=True, verbose_name='عنوان در url')
@@ -48,7 +48,7 @@ class ProductModel(models.Model):
         return self.product_title
 
     def product_cover_url(self):
-        return f'http://127.0.0.1:8000/{self.product_cover.url}'
+        return f'https://technoara.pythonanywhere.com/{self.product_cover.url}'
 
     def product_comment_count(self):
         return self.productcommentmodel_set.count()
@@ -98,7 +98,7 @@ class ProductImagesModel(models.Model):
         return f'عکس شماره {self.id} : {self.product.product_title}'
 
     def product_img_url(self):
-        return f'http://127.0.0.1:8000/{self.product_img.url}'
+        return f'https://technoara.pythonanywhere.com{self.product_img.url}'
 
 
 class ProductCommentModel(models.Model):

@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, re_path
 from .views import (FilterProductApiView, GetProductApiView, CreateProductApiView, CreateProductFeatureApiView,
                     CreateProductImagesApiView, CreateCommentApiView, GetCategoryApiView, GetProductCommentsApiView)
 
@@ -9,6 +9,6 @@ urlpatterns = [
     path('create-images/', CreateProductImagesApiView.as_view()),
     path('filter-product/', FilterProductApiView.as_view()),
     path('get-category/', GetCategoryApiView.as_view()),
-    path('get-product-comments/<slug:slug>/', GetProductCommentsApiView.as_view()),
-    path('get-product/<slug:slug>/', GetProductApiView.as_view())
+    re_path('get-product-comments/(?P<slug>[^/]+)/?$', GetProductCommentsApiView.as_view()),
+    re_path(r'get-product/(?P<slug>[^/]+)/?$', GetProductApiView.as_view())
 ]

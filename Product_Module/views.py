@@ -7,6 +7,7 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework import status
 
 from django.utils.text import slugify
+from django.utils.encoding import uri_to_iri
 
 from .authentication import TokenAuthentication
 from .serializers import *
@@ -62,7 +63,7 @@ class GetProductApiView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, slug, *args, **kwargs):
-        product = ProductModel.objects.filter(product_slug=slug).first()
+        product = ProductModel.objects.filter(product_slug=uri_to_iri(slug)).first()
         if product is not None:
             serializer = ProductSerializer(product)
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -100,7 +101,7 @@ class GetProductCommentsApiView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, slug, *args, **kwargs):
-        product = ProductModel.objects.filter(product_slug=slug).first()
+        product = ProductModel.objects.filter(product_slug=uri_to_iri(slug)).first()
         comments = ProductCommentModel.objects.filter(comment_product=product)
         serializer = ProductCommentSerializer(comments, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
