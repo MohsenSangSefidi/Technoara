@@ -32,6 +32,7 @@ class ProductModel(models.Model):
     product_description = models.TextField(null=True, blank=True, verbose_name='توضیحات کالا')
     product_price = models.IntegerField(verbose_name='قیمت کالا')
     product_sale_count = models.IntegerField(default=0, verbose_name='تعداد فروش کالا')
+    product_count = models.IntegerField(default=0, verbose_name='تعداد محصول')
     product_create_date = models.DateTimeField(auto_now=True, verbose_name='تاریخ ایجاد کالا')
     product_category = models.ForeignKey(SubCategoryModel, on_delete=models.CASCADE, verbose_name='دسته یندی کالا')
     product_discount = models.IntegerField(default=0, verbose_name='تخفیف کالا')
