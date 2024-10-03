@@ -11,7 +11,7 @@ from django.utils.encoding import uri_to_iri
 
 from .authentication import TokenAuthentication
 from .serializers import *
-from .models import ProductModel, SubCategoryModel, ProductFeatureModel, ProductImagesModel
+from .models import ProductModel, SubCategoryModel, ProductFeatureModel, ProductImagesModel, HomePageBannerModel
 
 
 class FilterProductApiView(APIView):
@@ -176,3 +176,24 @@ class GetCategoryApiView(APIView):
         categories = CategoryModel.objects.all()
         serializer = CategorySerializer(categories, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class BannerApiView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        banner = HomePageBannerModel.objects.filter(is_active=True)
+        serializer = BannerSerializer(banner, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request, *args, **kwargs):
+        serializer = CraeteBannerSerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            name = serializer.validated_data.get('name')
+            img = serializer.validated_data.get('img')
+            url = serializer.validated_data.get('url')
+            banner = HomePageBannerModel.objects.create(name=name, img=img, url=url)
+            banner.save()
+            serializer = BannerSerializer(banner)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)

@@ -1,5 +1,7 @@
+from flet_core import Banner
 from rest_framework import serializers
-from .models import ProductModel, ProductFeatureModel, ProductImagesModel, ProductCommentModel, CategoryModel
+from .models import (ProductModel, ProductFeatureModel, ProductImagesModel, ProductCommentModel, CategoryModel,
+                     HomePageBannerModel)
 
 
 class ProductListSerializer(serializers.ModelSerializer):
@@ -184,10 +186,11 @@ class ProductImagesSerializer(serializers.ModelSerializer):
 
     def get_product_detail(self, obj: ProductImagesModel):
         return {
-            'product_id' : obj.product.id,
+            'product_id': obj.product.id,
             'product_title': obj.product.product_title,
             'product_slug': obj.product.product_slug
         }
+
 
 class CreateProductImageSerializer(serializers.ModelSerializer):
     class Meta:
@@ -262,3 +265,21 @@ class CategorySerializer(serializers.ModelSerializer):
                 'sub_category_slug': item.sub_category_slug
             })
         return list
+
+
+class BannerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = HomePageBannerModel
+        fields = [
+            'name',
+            'img_url',
+            'url'
+        ]
+
+class CraeteBannerSerializer(serializers.Serializer):
+    name = serializers.CharField()
+    img = serializers.ImageField()
+    url = serializers.CharField()
+
+    class Meta:
+        fields = ['name', 'img', 'url']

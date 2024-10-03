@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import ProductModel, ProductFeatureModel, CategoryModel, SubCategoryModel, ProductCommentModel, ProductImagesModel
+from .models import ProductModel, ProductFeatureModel, CategoryModel, SubCategoryModel, ProductCommentModel, \
+    ProductImagesModel, HomePageBannerModel
 
 
 class ProductModelAdmin(admin.ModelAdmin):
@@ -29,9 +30,14 @@ class SubCategoryModelAdmin(admin.ModelAdmin):
     prepopulated_fields = {'sub_category_slug': ['sub_category_title']}
 
 
+class HomePageBannerModelAdmin(admin.ModelAdmin):
+    list_display = ['name', 'url']
+
+
 admin.site.register(ProductModel, ProductModelAdmin)
 admin.site.register(ProductFeatureModel, ProductFeatureModelAdmin)
 admin.site.register(ProductCommentModel, ProductCommentModelAdmin)
 admin.site.register(ProductImagesModel, ProductImagesModelAdmin)
 admin.site.register(CategoryModel, CategoryModelAdmin)
 admin.site.register(SubCategoryModel, SubCategoryModelAdmin)
+admin.site.register(HomePageBannerModel, HomePageBannerModelAdmin)
