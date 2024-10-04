@@ -41,7 +41,7 @@ class FilterProductApiView(APIView):
                                                        product_title__icontains=title if title else '')
 
                 paginator = PageNumberPagination()
-                paginator.page_size = 2
+                paginator.page_size = 5
                 results_page = paginator.paginate_queryset(data, request)
                 serializer = ProductListSerializer(results_page, many=True)
                 return paginator.get_paginated_response(serializer.data)
@@ -49,7 +49,7 @@ class FilterProductApiView(APIView):
             else:
                 data = ProductModel.objects.filter(product_is_active=True)
                 paginator = PageNumberPagination()
-                paginator.page_size = 2
+                paginator.page_size = 5
                 results_page = paginator.paginate_queryset(data, request)
                 serializer = ProductListSerializer(results_page, many=True)
                 return paginator.get_paginated_response(serializer.data)

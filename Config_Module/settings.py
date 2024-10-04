@@ -52,7 +52,8 @@ INSTALLED_APPS = [
     'Utils',
     'Product_Module',
     'User_Module',
-    'Cart_Module'
+    'Cart_Module',
+    'Blog_Module'
 ]
 
 MIDDLEWARE = [
