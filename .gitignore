@@ -1,0 +1,13 @@
+.idea
+
+Blog_Module/__pycache__
+Cart_Module/__pycache__
+Config_Module/__pycache__
+Product_Module/__pycache__
+User_Module/__pycache__
+Utils/__pycache__
+
+Blog_Module/migrations/__pycache__
+Cart_Module/migrations/__pycache__
+Product_Module/migrations/__pycache__
+User_Module/migrations/__pycache__

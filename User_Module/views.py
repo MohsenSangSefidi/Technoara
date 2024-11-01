@@ -1,32 +1,24 @@
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.views import APIView, Response
 from rest_framework.generics import RetrieveAPIView
-from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 
 from django.utils.crypto import get_random_string
-from django.contrib.auth import authenticate, login, logout
 from Utils.poll import verify_code
-from .authentication import TokenAuthentication
-from .serializers import (GetUserSerializer, ActiveUserSerializer, LoginUserSerializer, RegisterUserSerializer,
-                          SendVerifyCodeSerializer)
 from .models import UserModel
 from django.conf import settings
 from django.core.mail import send_mail
+from .serializers import (GetUserSerializer, ActiveUserSerializer, LoginUserSerializer, RegisterUserSerializer,
+                          SendVerifyCodeSerializer)
 
 
 class GetUserAPIView(RetrieveAPIView):
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
-
     queryset = UserModel.objects.all()
     serializer_class = GetUserSerializer
     lookup_field = 'user_token'
 
 
 class RegisterUserAPIView(APIView):
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
     parser_classes = (MultiPartParser, FormParser)
 
     def post(self, request, *args, **kwargs):
@@ -72,8 +64,6 @@ class RegisterUserAPIView(APIView):
 
 
 class ActiveUserAPIView(APIView):
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
 
     def put(self, request, *args, **kwargs):
         serializer = ActiveUserSerializer(data=request.data)
@@ -95,9 +85,6 @@ class ActiveUserAPIView(APIView):
 
 
 class LoginUserAPIView(APIView):
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
-
     def post(self, request, *args, **kwargs):
         serializer = LoginUserSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
@@ -117,15 +104,12 @@ class LoginUserAPIView(APIView):
                 else:
                     return Response({'detail': 'Invalid Password'}, status=status.HTTP_400_BAD_REQUEST)
             else:
-                return Response({'detail': 'Invalid Credentials'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'detail': 'User does not exist'}, status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class SendVerifyCodeAPIView(APIView):
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
-
     def post(self, request, *args, **kwargs):
         serializer = SendVerifyCodeSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
@@ -151,11 +135,11 @@ class SendVerifyCodeAPIView(APIView):
                         fail_silently=False,
                     )
                     detail = "Email Sent"
-                except:
+                except Exception as e:
                     detail = 'Can\'t send email'
 
                 return Response({'detail': detail}, status=status.HTTP_200_OK)
             else:
-                return Response({'detail': 'USer Not Found'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'detail': 'User Not Found'}, status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -1,3 +1,5 @@
+from django.utils.crypto import get_random_string
+from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
@@ -17,9 +19,9 @@ class UserModel(AbstractUser):
         return f'{self.username} : {self.email}'
 
     def user_avatar_url(self):
-        try:
+        if self.user_avatar is not None:
             return f'http://127.0.0.1:8000/{self.user_avatar.url}'
-        except:
+        else:
             return ''
 
 
@@ -46,3 +48,12 @@ class UserRoleModel(models.Model):
     def __str__(self):
         return f'{self.user.username} : {self.role.name}'
 
+
+class TokenModel(models.Model):
+    key = models.CharField(_("Key"), max_length=50, primary_key=True)
+    user = models.ForeignKey(UserModel, on_delete=models.CASCADE)
+
+    def save(self, *args, **kwargs):
+        if not self.key:
+            self.key = get_random_string(50)
+        return super().save(*args, **kwargs)
