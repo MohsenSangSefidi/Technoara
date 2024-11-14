@@ -1,6 +1,7 @@
 from rest_framework import serializers
-from .models import (ProductModel, ProductFeatureModel, ProductImagesModel, ProductCommentModel, CategoryModel,
-                     HomePageBannerModel)
+from .models import (
+    ProductModel, ProductFeatureModel, ProductImagesModel, ProductCommentModel, CategoryModel, HomePageBannerModel
+)
 
 
 class ProductListSerializer(serializers.ModelSerializer):
@@ -276,18 +277,25 @@ class BannerSerializer(serializers.ModelSerializer):
         ]
 
 
-class CraeteBannerSerializer(serializers.Serializer):
-    name = serializers.CharField()
-    img = serializers.ImageField()
-    url = serializers.CharField()
+class CreateBannerSerializer(serializers.Serializer):
+    name = serializers.CharField(required=True)
+    img = serializers.ImageField(required=True)
+    url = serializers.CharField(required=True)
 
     class Meta:
         fields = ['name', 'img', 'url']
 
 
 class CreateCategorySerializer(serializers.Serializer):
-    category_title = serializers.CharField()
-    category_slug = serializers.CharField()
+    category_title = serializers.CharField(required=True)
 
     class Meta:
-        fields = ['category_title', 'category_slug']
+        fields = ['category_title']
+
+
+class CreateSubCategorySerializer(serializers.Serializer):
+    sub_category_title = serializers.CharField(required=True)
+    category_slug = serializers.CharField(required=True)
+
+    class Meta:
+        fields = ['category_title', 'sub_category_title']

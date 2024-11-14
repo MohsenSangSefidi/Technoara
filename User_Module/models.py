@@ -5,9 +5,13 @@ from django.db import models
 
 
 class UserModel(AbstractUser):
+    username = None
     user_avatar = models.ImageField(null=True, blank=True, upload_to='user-avatar/')
     user_create_date = models.DateTimeField(auto_now=True)
     email = models.EmailField(unique=True)
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = []
 
     def __str__(self):
         return f'{self.username} : {self.email}'

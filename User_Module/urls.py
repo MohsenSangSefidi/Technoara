@@ -1,10 +1,9 @@
 from django.urls import path
-from .views import GetUserAPIView, RegisterUserAPIView, LoginUserAPIView, SendVerifyCodeAPIView, ResetPasswordAPIView
-
+from .views import LoginUserView, RegisterUserView, GetUserView, SendVerifyCodeView, ResetPasswordView
 urlpatterns = [
-    path('create-user/', RegisterUserAPIView.as_view()),
-    path('login-user/', LoginUserAPIView.as_view()),
-    path('get-user/<email>/', GetUserAPIView.as_view()),
-    path('send-verify-code/', SendVerifyCodeAPIView.as_view()),
-    path('rest-password/', ResetPasswordAPIView.as_view())
+    path('create-user/', RegisterUserView.as_view()),
+    path('login-user/', LoginUserView.as_view()),
+    path('get-user/<email>/', GetUserView.as_view()),
+    path('send-verify-code/', SendVerifyCodeView.as_view()),
+    path('rest-password/', ResetPasswordView.as_view())
 ]

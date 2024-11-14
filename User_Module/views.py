@@ -5,6 +5,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 
 from Utils.poll import random_code
+from datetime import datetime
 
 from .serializers import (
     UserSerializer, RegisterUserSerializer, LoginUserSerializer, SendVerifyCodeSerializer, ResetPasswordSerializer
@@ -60,11 +61,12 @@ class RegisterUserView(APIView):
             }, status=status.HTTP_400_BAD_REQUEST)
 
         user = UserModel(
-            username=username,
+            first_name=username,
             email=email.lower(),
             is_active=True,
         )
         user.set_password(password)
+        user.last_login = datetime.now()
         user.save()
 
         token, created = TokenModel.objects.get_or_create(
@@ -82,7 +84,7 @@ class RegisterUserView(APIView):
         }, status=status.HTTP_201_CREATED)
 
 
-class LoginUserAPIView(APIView):
+class LoginUserView(APIView):
     def post(self, request, *args, **kwargs):
         serializer = LoginUserSerializer(data=request.data)
 
@@ -107,6 +109,9 @@ class LoginUserAPIView(APIView):
                 'data': []
             })
 
+        user.last_login = datetime.now()
+        user.save()
+
         if not user.check_password(password):
             return Response({
                 'result': False,
@@ -127,7 +132,7 @@ class LoginUserAPIView(APIView):
         }, status=status.HTTP_200_OK)
 
 
-class SendVerifyCodeAPIView(APIView):
+class SendVerifyCodeView(APIView):
     def post(self, request, *args, **kwargs):
         serializer = SendVerifyCodeSerializer(data=request.data)
 
@@ -179,7 +184,7 @@ class SendVerifyCodeAPIView(APIView):
         }, status=status.HTTP_200_OK)
 
 
-class ResetPasswordAPIView(APIView):
+class ResetPasswordView(APIView):
     def post(self, request, *args, **kwargs):
         serializer = ResetPasswordSerializer(data=request.data)
 
@@ -218,6 +223,9 @@ class ResetPasswordAPIView(APIView):
         user.save()
 
         otp_object.delete()
+
+        user.last_login = datetime.now()
+        user.save()
 
         token, created = TokenModel.objects.get_or_create(user=user)
         serializer = UserSerializer(user)
