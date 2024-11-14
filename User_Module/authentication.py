@@ -4,3 +4,4 @@ from .models import TokenModel
 
 class UserAuthentication(TokenAuthentication):
     model = TokenModel
+    keyword = 'Technoara'

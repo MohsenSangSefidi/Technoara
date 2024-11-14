@@ -1,3 +1,4 @@
+from django.http import HttpRequest
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.views import Response
 from rest_framework.generics import RetrieveAPIView
@@ -8,6 +9,7 @@ from rest_framework import status
 
 from django.utils.text import slugify
 from django.utils.encoding import uri_to_iri
+from User_Module.authentication import UserAuthentication
 
 from .authentication import TokenAuthentication
 from .serializers import *
@@ -15,55 +17,42 @@ from .models import ProductModel, SubCategoryModel, ProductFeatureModel, Product
 
 
 class FilterProductApiView(APIView):
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
-
     def get(self, request, *args, **kwargs):
-        filter = ProductFilterSerializer(data=request.data)
-        if filter.is_valid(raise_exception=True):
+        data = ProductFilterSerializer(data=request.data)
+        if data.is_valid(raise_exception=True):
 
             # Serializer Data
-            title = filter.validated_data.get('product_title')
-            category = filter.validated_data.get('category_filter')
-            price_start = filter.validated_data.get('price_filter_start')
-            price_end = filter.validated_data.get('price_filter_end')
+            title = data.validated_data.get('product_title')
+            category = data.validated_data.get('category_filter')
+            price_start = data.validated_data.get('price_filter_start')
+            price_end = data.validated_data.get('price_filter_end')
 
-            if title or category or price_start or price_end:
-                category_obj = SubCategoryModel.objects.filter(sub_category_slug=category if category else '').first()
-                data = ProductModel.objects.filter(product_category_id=category_obj.id if category_obj else 0)
-                if data:
-                    data = data.filter(product_price__gte=price_start if price_start else 0,
-                                       product_price__lte=price_end if price_end else 99999999,
-                                       product_title__icontains=title if title else '')
-                else:
-                    data = ProductModel.objects.filter(product_price__gte=price_start if price_start else 0,
-                                                       product_price__lte=price_end if price_end else 99999999,
-                                                       product_title__icontains=title if title else '')
+            filters = {}
+            if title is not None:
+                filters['title__icontains'] = title
 
-                paginator = PageNumberPagination()
-                paginator.page_size = 5
-                results_page = paginator.paginate_queryset(data, request)
-                serializer = ProductListSerializer(results_page, many=True)
-                return paginator.get_paginated_response(serializer.data)
+            if category is not None:
+                filters['product_category_id'] = category
 
-            else:
-                data = ProductModel.objects.filter(product_is_active=True)
-                paginator = PageNumberPagination()
-                paginator.page_size = 5
-                results_page = paginator.paginate_queryset(data, request)
-                serializer = ProductListSerializer(results_page, many=True)
-                return paginator.get_paginated_response(serializer.data)
+            if price_start is not None:
+                filters['product_price__gt'] = price_start
+
+            if price_end is not None:
+                filters['product_price__lt'] = price_end
+
+            products = ProductModel.objects.filter(**filters)
+            serializer = ProductSerializer(products, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
         else:
-            return Response(filter.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(data.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class GetProductApiView(APIView):
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    def get(self, request, *args, **kwargs):
+        slug = request.query_params.get('slug')
 
-    def get(self, request, slug, *args, **kwargs):
-        product = ProductModel.objects.filter(product_slug=uri_to_iri(slug)).first()
+        product = ProductModel.objects.filter(product_slug=slug).first()
         if product is not None:
             serializer = ProductSerializer(product)
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -72,7 +61,7 @@ class GetProductApiView(APIView):
 
 
 class CreateProductApiView(APIView):
-    authentication_classes = [TokenAuthentication]
+    authentication_classes = [UserAuthentication]
     permission_classes = [IsAuthenticated]
     parser_classes = (MultiPartParser, FormParser)
 
@@ -97,18 +86,17 @@ class CreateProductApiView(APIView):
 
 
 class GetProductCommentsApiView(APIView):
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    def get(self, request, *args, **kwargs):
+        slug = request.query_params.get('slug')
 
-    def get(self, request, slug, *args, **kwargs):
-        product = ProductModel.objects.filter(product_slug=uri_to_iri(slug)).first()
+        product = ProductModel.objects.filter(product_slug=slug).first()
         comments = ProductCommentModel.objects.filter(comment_product=product)
         serializer = ProductCommentSerializer(comments, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class CreateProductFeatureApiView(APIView):
-    authentication_classes = [TokenAuthentication]
+    authentication_classes = [UserAuthentication]
     permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
@@ -131,7 +119,7 @@ class CreateProductFeatureApiView(APIView):
 
 
 class CreateProductImagesApiView(APIView):
-    authentication_classes = [TokenAuthentication]
+    authentication_classes = [UserAuthentication]
     permission_classes = [IsAuthenticated]
     parser_classes = (MultiPartParser, FormParser)
 
@@ -148,7 +136,7 @@ class CreateProductImagesApiView(APIView):
 
 
 class CreateCommentApiView(APIView):
-    authentication_classes = [TokenAuthentication]
+    authentication_classes = [UserAuthentication]
     permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
@@ -169,9 +157,6 @@ class CreateCommentApiView(APIView):
 
 
 class GetCategoryApiView(APIView):
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
-
     def get(self, request, *args, **kwargs):
         categories = CategoryModel.objects.all()
         serializer = CategorySerializer(categories, many=True)
@@ -179,9 +164,6 @@ class GetCategoryApiView(APIView):
 
 
 class BannerApiView(APIView):
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
-
     def get(self, request, *args, **kwargs):
         banner = HomePageBannerModel.objects.filter(is_active=True)
         serializer = BannerSerializer(banner, many=True)
@@ -197,3 +179,8 @@ class BannerApiView(APIView):
             banner.save()
             serializer = BannerSerializer(banner)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+# class CreateCategory(APIView):
+#     def post(self, request, *args, **kwargs):
+#         serializer = CreateCategorySerializer(data=request.data)

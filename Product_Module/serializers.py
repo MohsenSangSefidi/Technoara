@@ -1,4 +1,3 @@
-from flet_core import Banner
 from rest_framework import serializers
 from .models import (ProductModel, ProductFeatureModel, ProductImagesModel, ProductCommentModel, CategoryModel,
                      HomePageBannerModel)
@@ -276,6 +275,7 @@ class BannerSerializer(serializers.ModelSerializer):
             'url'
         ]
 
+
 class CraeteBannerSerializer(serializers.Serializer):
     name = serializers.CharField()
     img = serializers.ImageField()
@@ -283,3 +283,11 @@ class CraeteBannerSerializer(serializers.Serializer):
 
     class Meta:
         fields = ['name', 'img', 'url']
+
+
+class CreateCategorySerializer(serializers.Serializer):
+    category_title = serializers.CharField()
+    category_slug = serializers.CharField()
+
+    class Meta:
+        fields = ['category_title', 'category_slug']

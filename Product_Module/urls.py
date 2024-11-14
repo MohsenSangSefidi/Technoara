@@ -10,7 +10,7 @@ urlpatterns = [
     path('create-images/', CreateProductImagesApiView.as_view()),
     path('filter-product/', FilterProductApiView.as_view()),
     path('get-category/', GetCategoryApiView.as_view()),
-    re_path('get-product-comments/(?P<slug>[^/]+)/?$', GetProductCommentsApiView.as_view()),
-    re_path(r'get-product/(?P<slug>[^/]+)/?$', GetProductApiView.as_view()),
+    path('get-product-comments/', GetProductCommentsApiView.as_view()),
+    path('get-product/', GetProductApiView.as_view()),
     path('banner/', BannerApiView.as_view()),
 ]

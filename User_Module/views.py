@@ -1,145 +1,234 @@
-from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.views import APIView, Response
-from rest_framework.generics import RetrieveAPIView
 from rest_framework import status
 
-from django.utils.crypto import get_random_string
-from Utils.poll import verify_code
-from .models import UserModel
-from django.conf import settings
 from django.core.mail import send_mail
-from .serializers import (GetUserSerializer, ActiveUserSerializer, LoginUserSerializer, RegisterUserSerializer,
-                          SendVerifyCodeSerializer)
+from django.conf import settings
+
+from Utils.poll import random_code
+
+from .serializers import (
+    UserSerializer, RegisterUserSerializer, LoginUserSerializer, SendVerifyCodeSerializer, ResetPasswordSerializer
+)
+from .models import TokenModel, OTPModel, UserModel
 
 
-class GetUserAPIView(RetrieveAPIView):
-    queryset = UserModel.objects.all()
-    serializer_class = GetUserSerializer
-    lookup_field = 'user_token'
+class GetUserView(APIView):
+    def get(self, request, email, *args, **kwargs):
+        user = UserModel.objects.filter(email=email).first()
+
+        if user is None:
+            return Response({
+                'result': False,
+                'message': 'کاربری با این ایمیل وجود ندارد.',
+                'data': [],
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = UserSerializer(user)
+        return Response({
+            'result': True,
+            'massage': 'کاربر پیدا شد',
+            'data': [
+                serializer.data
+            ]
+        })
 
 
-class RegisterUserAPIView(APIView):
-    parser_classes = (MultiPartParser, FormParser)
-
+class RegisterUserView(APIView):
     def post(self, request, *args, **kwargs):
         serializer = RegisterUserSerializer(data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            avatar = serializer.validated_data.get('user_avatar')
-            username = serializer.validated_data.get('username')
-            first_name = serializer.validated_data.get('first_name')
-            last_name = serializer.validated_data.get('last_name')
-            password = serializer.validated_data.get('password')
-            email = serializer.validated_data.get('email')
-            check_user = UserModel.objects.filter(username=username, email=email.lower()).first()
-            if check_user is None:
-                user = UserModel(username=username, first_name=first_name, last_name=last_name, email=email.lower(),
-                                 is_active=False, user_token=get_random_string(50), user_verify_code=verify_code(),
-                                 user_avatar=avatar)
-                user.set_password(password)
-                user.save()
 
-                HOST_EMAIL = settings.EMAIL_HOST_USER
-                user_email = user.email
-                detail = ''
+        if not serializer.is_valid():
+            return Response({
+                'result': False,
+                'message': 'اطلاعات وارد شده صحیح نیست.',
+                'data': [
+                    serializer.errors
+                ]
+            }, status=status.HTTP_400_BAD_REQUEST)
 
-                try:
-                    send_mail(
-                        "Verify Code",
-                        f"It's your Code : {user.user_verify_code}",
-                        HOST_EMAIL,
-                        [user_email],
-                        fail_silently=False,
-                    )
-                    detail = "Email Sent"
-                except:
-                    detail = 'Can\'t send email'
+        username = serializer.validated_data.get('username')
+        password = serializer.validated_data.get('password')
+        email = serializer.validated_data.get('email')
 
-                serializer = GetUserSerializer(user)
-                return Response({'detail': detail, 'user-detail': serializer.data}, status=status.HTTP_201_CREATED)
-            else:
-                return Response({'detail': 'User Already Exists'}, status=status.HTTP_400_BAD_REQUEST)
+        check_user = UserModel.objects.filter(email=email.lower()).first()
 
-        else:
-            Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        if check_user is not None:
+            return Response({
+                'result': False,
+                'massage': 'کاربری با این ایمیل وجود دارد.',
+                'data': []
+            }, status=status.HTTP_400_BAD_REQUEST)
 
+        user = UserModel(
+            username=username,
+            email=email.lower(),
+            is_active=True,
+        )
+        user.set_password(password)
+        user.save()
 
-class ActiveUserAPIView(APIView):
+        token, created = TokenModel.objects.get_or_create(
+            user=user
+        )
 
-    def put(self, request, *args, **kwargs):
-        serializer = ActiveUserSerializer(data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            user_token = serializer.validated_data.get('user_token')
-            verify_code = serializer.validated_data.get('verify_code')
-            user = UserModel.objects.filter(user_token=user_token).first()
-            if user is not None:
-                if str(user.user_verify_code) == str(verify_code):
-                    user.is_active = True
-                    user.save()
-                    return Response({'detail': 'User Activated'}, status=status.HTTP_200_OK)
-                else:
-                    return Response({'detail': 'Invalid Code'}, status=status.HTTP_400_BAD_REQUEST)
-            else:
-                return Response({'detail': 'User Not Found'}, status=status.HTTP_400_BAD_REQUEST)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer = UserSerializer(user)
+        return Response({
+            'result': True,
+            'massage': 'حساب کاربری با موفقیت ایجاد شد',
+            'data': [{
+                'token': token.key,
+                'user-info': serializer.data,
+            }]
+        }, status=status.HTTP_201_CREATED)
 
 
 class LoginUserAPIView(APIView):
     def post(self, request, *args, **kwargs):
         serializer = LoginUserSerializer(data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            email = serializer.validated_data.get('email')
-            password = serializer.validated_data.get('password')
-            user = UserModel.objects.filter(email=email.lower()).first()
-            if user is not None:
-                if user.check_password(password):
-                    if user.is_active:
-                        user.user_token = get_random_string(60)
-                        user.save()
-                        serializer = GetUserSerializer(user)
-                        return Response({'token': user.user_token, 'user-detail': serializer.data},
-                                        status=status.HTTP_200_OK)
-                    else:
-                        return Response({'detail': 'Account Disabale'}, status=status.HTTP_403_FORBIDDEN)
-                else:
-                    return Response({'detail': 'Invalid Password'}, status=status.HTTP_400_BAD_REQUEST)
-            else:
-                return Response({'detail': 'User does not exist'}, status=status.HTTP_400_BAD_REQUEST)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        if not serializer.is_valid():
+            return Response({
+                'result': False,
+                'message': 'اطلاعات وارد شده صحیح نیست.',
+                'data': [
+                    serializer.errors
+                ]
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        email = serializer.validated_data.get('email')
+        password = serializer.validated_data.get('password')
+
+        user = UserModel.objects.filter(email=email.lower()).first()
+
+        if user is None:
+            return Response({
+                'result': False,
+                'massage': 'کاربری با این ایمیل یافت نشد.',
+                'data': []
+            })
+
+        if not user.check_password(password):
+            return Response({
+                'result': False,
+                'massage': 'رمز عبور اشتباه است',
+                'data': []
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        token, created = TokenModel.objects.get_or_create(user=user)
+
+        serializer = UserSerializer(user)
+        return Response({
+            'result': True,
+            'massage': 'ورود با موفقیت انجام شد',
+            'data': [{
+                'token': token.key,
+                'user-info': serializer.data,
+            }]
+        }, status=status.HTTP_200_OK)
 
 
 class SendVerifyCodeAPIView(APIView):
     def post(self, request, *args, **kwargs):
         serializer = SendVerifyCodeSerializer(data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            user_token = serializer.validated_data.get('user_token')
-            email = serializer.validated_data.get('email')
 
-            user = UserModel.objects.filter(user_token=user_token, email=email.lower()).first()
+        if not serializer.is_valid():
+            return Response({
+                'result': False,
+                'message': 'اطلاعات وارد شده صحیح نیست.',
+                'data': [
+                    serializer.errors
+                ]
+            }, status=status.HTTP_400_BAD_REQUEST)
 
-            if user is not None:
-                user.user_verify_code = verify_code()
-                user_email = user.email
-                user.save()
+        email = serializer.validated_data.get('email')
 
-                HOST_EMAIL = settings.EMAIL_HOST_USER
-                detail = ''
+        user = UserModel.objects.filter(email=email.lower()).first()
 
-                try:
-                    send_mail(
-                        "Verify Code",
-                        f"It's your Code : {user.user_verify_code}",
-                        HOST_EMAIL,
-                        [user_email.lower()],
-                        fail_silently=False,
-                    )
-                    detail = "Email Sent"
-                except Exception as e:
-                    detail = 'Can\'t send email'
+        if user is None:
+            return Response({
+                'result': False,
+                'massage': 'کاربری با این ایمیل یافت نشد.',
+                'data': []
+            }, status=status.HTTP_400_BAD_REQUEST)
 
-                return Response({'detail': detail}, status=status.HTTP_200_OK)
-            else:
-                return Response({'detail': 'User Not Found'}, status=status.HTTP_400_BAD_REQUEST)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        otp, created = OTPModel.objects.get_or_create(user=user)
+        otp.otp = random_code(6)
+        otp.save()
+
+        try:
+            send_mail(
+                "Verify Code",
+                f"It's your Code : {otp.otp}",
+                settings.EMAIL_HOST_USER,
+                [user.email],
+                fail_silently=False,
+            )
+            detail = 'کد تایید به ایمیل شما ارسال شد.'
+        except Exception as e:
+            detail = 'در ارسال کد مشکلی پیش آمده لطفا دوباره امتحان کنید.'
+
+        return Response({
+            'result': True,
+            'massage': detail,
+            'data': [
+                {
+                    'code': otp.otp,
+                    'email': user.email,
+                }
+            ]
+        }, status=status.HTTP_200_OK)
+
+
+class ResetPasswordAPIView(APIView):
+    def post(self, request, *args, **kwargs):
+        serializer = ResetPasswordSerializer(data=request.data)
+
+        if not serializer.is_valid():
+            return Response({
+                'result': False,
+                'message': 'اطلاعات وارد شده صحیح نیست.',
+                'data': [
+                    serializer.errors
+                ]
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        email = serializer.validated_data.get('email')
+        password = serializer.validated_data.get('password')
+        otp = serializer.validated_data.get('otp')
+
+        user = UserModel.objects.filter(email=email.lower()).first()
+
+        if user is None:
+            return Response({
+                'result': False,
+                'massage': 'کاربری با این ایمیل یافت نشد.',
+                'data': []
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        otp_object = OTPModel.objects.filter(user_id=user.id, otp=otp).first()
+
+        if otp_object is None:
+            return Response({
+                'result': False,
+                'massage': 'کد وارد شده اشتباه است',
+                'data': []
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        user.set_password(password)
+        user.save()
+
+        otp_object.delete()
+
+        token, created = TokenModel.objects.get_or_create(user=user)
+        serializer = UserSerializer(user)
+
+        return Response({
+            'result': True,
+            'massage': 'رمز عبور با موفقیت تغییر کرد.',
+            'data': [
+                {
+                    'token': token.key,
+                    'user-info': serializer.data,
+                }
+            ]
+        }, status=status.HTTP_200_OK)
