@@ -4,8 +4,9 @@ from rest_framework.views import Response
 from rest_framework.views import APIView
 from rest_framework import status
 
+from slugify import slugify
+
 from Config_Module.authentication import UserAuthentication
-from django.utils.text import slugify
 from django.db import IntegrityError
 
 from .models import (
@@ -391,7 +392,7 @@ class CreateSubCategoryView(APIView):
                 ]
             }, status=status.HTTP_400_BAD_REQUEST)
 
-        sub_category_title = serializer.validated_data.get('category_title')
+        sub_category_title = serializer.validated_data.get('sub_category_title')
         sub_category_slug = slugify(sub_category_title)
         category_slug = serializer.validated_data.get('category_slug')
 
@@ -404,7 +405,7 @@ class CreateSubCategoryView(APIView):
                 'data': []
             }, status=status.HTTP_400_BAD_REQUEST)
 
-        sub_category = SubCategoryModel.objects.filter(category_slug=category_slug).first()
+        sub_category = SubCategoryModel.objects.filter(sub_category_slug=sub_category_slug).first()
 
         if sub_category is not None:
             return Response({

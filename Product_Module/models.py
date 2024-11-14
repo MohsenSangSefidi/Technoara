@@ -116,6 +116,7 @@ class ProductCommentModel(models.Model):
     def __str__(self):
         return f'{self.comment_product.product_title} : {self.comment_user.username}'
 
+
 class HomePageBannerModel(models.Model):
     name = models.CharField(max_length=100, verbose_name='نام')
     img = models.ImageField(upload_to='banner/', verbose_name='عکس')
